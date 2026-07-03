@@ -3,21 +3,27 @@ import { Link } from "react-router-dom";
 
 function Employees() {
   const [employee, setEmployee] = useState([]);
+  const [limit, setLimit] = useState(658);
+  const [Page, setPage] = useState(1);
   const [isloading, setisloading] = useState(true)
-  async function fetchEnployee() {
+  const [errorTablemessage, seterrorTablemessage] = useState("Loading Employee Data...")
+  async function fetchEmployee() {
+
     try {
-      const response = await fetch("http://localhost:3000/api/employee");
+      const response = await fetch(`http://localhost:3000/api/employee?page=${Page}&limit=${limit}`);
       if (response.status != 200) {
         return console.log("Internal Server error...");
       }
       const value = await response.json();
       if (value.success) {
-        console.log(value.data);
         setEmployee(value.data);
         setisloading(false);
+        if (value.data.length === 0) {
+          setisloading(true)
+          seterrorTablemessage('No Record Found')
+        }
       } else {
         console.log(value);
-
       }
     } catch (err) {
       console.log(err);
@@ -27,8 +33,8 @@ function Employees() {
   }
 
   useEffect(() => {
-    fetchEnployee();
-  }, [])
+    fetchEmployee();
+  }, [Page])
 
 
   return (
@@ -120,10 +126,8 @@ function Employees() {
               </thead>
 
               <tbody>
-                {isloading ? <tr><td colSpan="9" className="text-center">Loading Employee Data...</td></tr> : employee.map((emp) => {
+                {isloading ? <tr><td colSpan="9" className="text-center">{errorTablemessage}</td></tr> : employee.map((emp) => {
                   return (
-
-
                     <tr key={emp.id}>
                       <td>{emp.employee_code}</td>
                       <td>
@@ -141,9 +145,9 @@ function Employees() {
                       <td>
 
                         <span className={`badge
-                           ${emp.status === "Active" ? "bg-success" : emp.status === "Inactive" ? "bg-danger" : "bg-warning" } 
+                           ${emp.status === "Active" ? "bg-success" : emp.status === "Inactive" ? "bg-danger" : "bg-warning"} 
                            `}
-                           >
+                        >
                           {emp.status}
                         </span>
 
@@ -164,7 +168,7 @@ function Employees() {
                           <i className="bi bi-pencil-square"></i>
                         </Link>
 
-                        <Link to={"delete/" +emp.id} className="btn btn-danger btn-sm">
+                        <Link to={"delete/" + emp.id} className="btn btn-danger btn-sm">
                           <i className="bi bi-trash-fill"></i>
                         </Link>
 
@@ -192,7 +196,7 @@ function Employees() {
 
             <ul className="pagination pagination-sm mb-0">
 
-              <li className="page-item disabled">
+              <li onClick={() => setPage(Page - 1)} className="page-item disabled">
                 <button className="page-link">
                   Previous
                 </button>
@@ -200,11 +204,11 @@ function Employees() {
 
               <li className="page-item active">
                 <button className="page-link">
-                  1
+                  {Page}
                 </button>
               </li>
 
-              <li className="page-item">
+              <li onClick={() => setPage(Page + 1)} className="page-item">
                 <button className="page-link">
                   Next
                 </button>

@@ -23,19 +23,14 @@ export function fetchHomeData(req, res) {
 
 }
 export function fetchEmployeeData(req, res) {
-    getEmployeeData((err, result) => {
+    getEmployeeData(req,(err, result) => {
         if (err) {
             return res.json({
                 success: false,
                 message: err
             });
         }
-        if (result.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Record Not Found..."
-            });
-        }
+       
         res.status(200).json({
             success: true,
             message: "OK",
