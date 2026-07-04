@@ -3,26 +3,30 @@ import { Link } from "react-router-dom";
 
 function Employees() {
   const [employee, setEmployee] = useState([]);
-  const [limit, setLimit] = useState(658);
+  const [limit, setLimit] = useState(50);
   const [Page, setPage] = useState(1);
   const [isloading, setisloading] = useState(true)
+  const [prebtn, setprebtn] = useState("disabled");
   const [errorTablemessage, seterrorTablemessage] = useState("Loading Employee Data...")
   async function fetchEmployee() {
 
     try {
-      const response = await fetch(`http://localhost:3000/api/employee?page=${Page}&limit=${limit}`);
+      const response = await fetch(`http://localhost:3000/api/employee?empID=5&page=${Page}&limit=${limit}`);
       if (response.status != 200) {
         return console.log("Internal Server error...");
       }
       const value = await response.json();
       if (value.success) {
-        setEmployee(value.data);
+        console.log(value);
+        
+        setEmployee(value.data.data);
         setisloading(false);
         if (value.data.length === 0) {
           setisloading(true)
           seterrorTablemessage('No Record Found')
         }
       } else {
+
         console.log(value);
       }
     } catch (err) {
@@ -189,14 +193,14 @@ function Employees() {
         <div className="card-footer d-flex justify-content-between align-items-center">
 
           <small className="text-muted">
-            Showing 1 to 3 of 3 Employees
+           {`Showing ${Page*limit} to ${6} of ${Page*limit} Employees`}
           </small>
 
           <nav>
 
             <ul className="pagination pagination-sm mb-0">
 
-              <li onClick={() => setPage(Page - 1)} className="page-item disabled">
+              <li onClick={() => Page > 1 ? setPage(Page - 1) : ""} className={`page-item ${Page === 1 ? "disabled" : ""} `}>
                 <button className="page-link">
                   Previous
                 </button>
