@@ -1,4 +1,4 @@
-import { getHomeData, getEmployeeData, getEmployeeById } from "../models/HomeModel.js";
+import { getHomeData, getEmployeeData, getEmployeeById, getDepartment } from "../models/HomeModel.js";
 
 export function fetchHomeData(req, res) {
     getHomeData((err, result) => {
@@ -23,14 +23,14 @@ export function fetchHomeData(req, res) {
 
 }
 export function fetchEmployeeData(req, res) {
-    getEmployeeData(req,(err, result) => {
+    getEmployeeData(req, (err, result) => {
         if (err) {
             return res.json({
                 success: false,
                 message: err
             });
         }
-       
+
         res.status(200).json({
             success: true,
             message: "OK",
@@ -38,7 +38,27 @@ export function fetchEmployeeData(req, res) {
         });
     })
 
-} export function fetchEmployeeById(req, res) {
+} 
+
+export function fetchDepartment(req, res) {
+    getDepartment((err, result) => {
+        if (err) {
+            return res.json({
+                success: false,
+                message: err
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "OK",
+            data: result
+        });
+    })
+
+}
+
+export function fetchEmployeeById(req, res) {
 
     const empId = req.params.id;
     if (empId === '') {

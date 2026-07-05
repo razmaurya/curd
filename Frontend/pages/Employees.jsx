@@ -2,41 +2,63 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 function Employees() {
+  const [department, setDepartment] = useState([]);
   const [employee, setEmployee] = useState([]);
-  const [limit, setLimit] = useState(50);
+  const [limit, setLimit] = useState(100);
   const [Page, setPage] = useState(1);
+  const [pages, setPages] = useState(0)
+  const [tRecord, setTRecord] = useState(0)
   const [isloading, setisloading] = useState(true)
   const [prebtn, setprebtn] = useState("disabled");
   const [errorTablemessage, seterrorTablemessage] = useState("Loading Employee Data...")
   async function fetchEmployee() {
-
     try {
-      const response = await fetch(`http://localhost:3000/api/employee?empID=5&page=${Page}&limit=${limit}`);
+      const response = await fetch(`http://localhost:3000/api/employee?empID=&page=${Page}&limit=${limit}`);
       if (response.status != 200) {
         return console.log("Internal Server error...");
       }
       const value = await response.json();
       if (value.success) {
-        console.log(value);
-        
         setEmployee(value.data.data);
         setisloading(false);
-        if (value.data.length === 0) {
+        setPages(value.data.pages);
+        setTRecord(value.data.total);
+        if (value.data.data.length === 0) {
           setisloading(true)
           seterrorTablemessage('No Record Found')
+          console.log(value);
         }
       } else {
-
+        seterrorTablemessage('No Record Found')
         console.log(value);
       }
     } catch (err) {
+      seterrorTablemessage('Something Went Worng...')
       console.log(err);
     }
 
 
   }
+  async function fetchDepartment() {
+    try {
+      const res = await fetch("http://localhost:3000/api/department");
+      const data = await res.json();
+      if (data.success) {
+        console.log(data.data);
+
+        setDepartment(data.data);
+      }
+    } catch (err) {
+      console.log(err);
+
+    }
+
+
+  }
+
 
   useEffect(() => {
+    fetchDepartment();
     fetchEmployee();
   }, [Page])
 
@@ -65,30 +87,43 @@ function Employees() {
 
       {/* Search & Filter */}
       <div className="card shadow-sm border-0 mb-4">
-        <div className="card-body">
+        <form className="card-body">
 
           <div className="row g-3">
 
-            <div className="col-md-6">
+            <div className="col-md-4" >
               <input
+                name="search"
                 type="text"
                 className="form-control"
-                placeholder="Search Employee..."
+                placeholder="Search by EmpID,Name,Email..."
               />
             </div>
 
             <div className="col-md-3">
-              <select className="form-select">
-                <option>All Departments</option>
-                <option>IT</option>
-                <option>HR</option>
-                <option>Finance</option>
-                <option>Marketing</option>
+              <select className="form-select" name="department">
+                <option value="">All Departments</option>
+                {
+                  department.map((dep) => {
+                    return (
+                      <option key={dep.department}>{dep.department}</option>
+                    )
+                  })
+
+                }
               </select>
             </div>
-
             <div className="col-md-3">
-              <button className="btn btn-outline-primary w-100">
+              <select className="form-select" name="designation">
+                <option>All Designation</option>
+                <option>Software Engineer</option>
+                <option>HR Executive</option>
+                <option>Accountant</option>
+                <option>Sales Executive</option>
+              </select>
+            </div>
+            <div className="col-md-2">
+              <button type="submit" className="btn btn-outline-primary w-100">
                 <i className="bi bi-search me-2"></i>
                 Search
               </button>
@@ -96,7 +131,7 @@ function Employees() {
 
           </div>
 
-        </div>
+        </form>
       </div>
 
       {/* Employee Table */}
@@ -193,7 +228,7 @@ function Employees() {
         <div className="card-footer d-flex justify-content-between align-items-center">
 
           <small className="text-muted">
-           {`Showing ${Page*limit} to ${6} of ${Page*limit} Employees`}
+            {`Showing ${((Page - 1) * limit + 1)} to ${Math.min(Page * limit, tRecord)} of ${tRecord} Employees`}
           </small>
 
           <nav>
@@ -212,8 +247,8 @@ function Employees() {
                 </button>
               </li>
 
-              <li onClick={() => setPage(Page + 1)} className="page-item">
-                <button className="page-link">
+              <li onClick={() => Page < pages ? setPage(Page + 1) : ""} className={`page-item ${Page == pages ? "disabled" : ""}`}>
+                <button className={`page-link`}>
                   Next
                 </button>
               </li>

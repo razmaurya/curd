@@ -41,6 +41,11 @@ export function getEmployeeData(data, callback) {
         })
     });
 }
+
+export function getDepartment(callback) {
+    return conn.query('SELECT distinct department from employees ', callback);
+}
+
 export function getEmployeeById(empi, cadllback) {
     return conn.query('SELECT * from employees where id = ?', [empid], callback);
 }
